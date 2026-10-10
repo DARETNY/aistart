@@ -1,7 +1,7 @@
 import time
 
-import anthropic
 import structlog
+from openai import OpenAI
 from pydantic import BaseModel
 
 from aistart.config import settings
@@ -19,30 +19,35 @@ class LLMResponse(BaseModel):
 
 class LLMClient:
     def __init__(self) -> None:
-        self._client = anthropic.Anthropic(
-            api_key=settings.anthropic_api_key,
+        self._client = OpenAI(
+            base_url=settings.llm_base_url,
+            api_key=settings.llm_api_key,
             max_retries=settings.max_retries,
             timeout=settings.timeout_s,
         )
 
     def complete(self, prompt: str, system: str | None = None) -> LLMResponse:
+        messages = []
+        if system:
+            messages.append({"role": "system", "content": system})
+        messages.append({"role": "user", "content": prompt})
+
         start = time.perf_counter()
-        kwargs = {"system": system} if system else {}
-        msg = self._client.messages.create(
+        r = self._client.chat.completions.create(
             model=settings.model,
             max_tokens=settings.max_tokens,
-            messages=[{"role": "user", "content": prompt}],
-            **kwargs,
+            messages=messages,
         )
         latency = time.perf_counter() - start
+
+        inp, out = r.usage.prompt_tokens, r.usage.completion_tokens
         cost = (
-            msg.usage.input_tokens * settings.price_in_per_mtok
-            + msg.usage.output_tokens * settings.price_out_per_mtok
+            inp * settings.price_in_per_mtok + out * settings.price_out_per_mtok
         ) / 1_000_000
         resp = LLMResponse(
-            text=msg.content[0].text,
-            input_tokens=msg.usage.input_tokens,
-            output_tokens=msg.usage.output_tokens,
+            text=r.choices[0].message.content,
+            input_tokens=inp,
+            output_tokens=out,
             latency_s=round(latency, 3),
             cost_usd=round(cost, 6),
         )
