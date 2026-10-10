@@ -53,3 +53,7 @@ class LLMClient:
         )
         log.info("llm_call", **resp.model_dump(exclude={"text"}))
         return resp
+
+    @property
+    def raw(self) -> OpenAI:
+        return self._client
