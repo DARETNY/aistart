@@ -7,6 +7,7 @@ class Settings(BaseSettings):
     llm_base_url: str = "http://localhost:11434/v1"
     llm_api_key: str = "ollama"
     model: str = "llama3.2"
+    embed_model: str = "nomic-embed-text"
     max_tokens: int = 1024
     max_retries: int = 3
     timeout_s: float = 60.0
