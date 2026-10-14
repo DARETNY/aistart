@@ -4,7 +4,10 @@ from aistart.config import settings
 from aistart.llm.client import LLMClient
 
 
-def embed_texts(client: LLMClient, texts: list[str], batch_size: int = 32) -> np.ndarray:
+def embed_texts(
+    client: LLMClient, texts: list[str], prefix: str = "", batch_size: int = 32
+) -> np.ndarray:
+    texts = [prefix + t for t in texts]
     vectors: list[list[float]] = []
     for i in range(0, len(texts), batch_size):
         batch = texts[i : i + batch_size]

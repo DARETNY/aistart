@@ -8,6 +8,8 @@ class Settings(BaseSettings):
     llm_api_key: str = "ollama"
     model: str = "llama3.2"
     embed_model: str = "nomic-embed-text"
+    embed_doc_prefix: str = ""
+    embed_query_prefix: str = ""
     max_tokens: int = 1024
     max_retries: int = 3
     timeout_s: float = 60.0

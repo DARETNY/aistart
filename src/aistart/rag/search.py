@@ -1,5 +1,6 @@
 import sys
 
+from aistart.config import settings
 from aistart.llm.client import LLMClient
 from aistart.rag.embeddings import embed_texts
 from aistart.rag.index import INDEX_DIR
@@ -8,7 +9,7 @@ from aistart.rag.store import VectorStore
 
 def search(query: str, k: int = 3):
     store = VectorStore.load(INDEX_DIR)
-    qvec = embed_texts(LLMClient(), [query])[0]
+    qvec = embed_texts(LLMClient(), [query], prefix=settings.embed_query_prefix)[0]
     return store.search(qvec, k)
 
 
