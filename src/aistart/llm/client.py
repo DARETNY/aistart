@@ -26,7 +26,13 @@ class LLMClient:
             timeout=settings.timeout_s,
         )
 
-    def complete(self, prompt: str, system: str | None = None) -> LLMResponse:
+    @property
+    def raw(self) -> OpenAI:
+        return self._client
+
+    def complete(
+        self, prompt: str, system: str | None = None, temperature: float = 0.0
+    ) -> LLMResponse:
         messages = []
         if system:
             messages.append({"role": "system", "content": system})
@@ -36,6 +42,7 @@ class LLMClient:
         r = self._client.chat.completions.create(
             model=settings.model,
             max_tokens=settings.max_tokens,
+            temperature=temperature,
             messages=messages,
         )
         latency = time.perf_counter() - start
@@ -53,7 +60,3 @@ class LLMClient:
         )
         log.info("llm_call", **resp.model_dump(exclude={"text"}))
         return resp
-
-    @property
-    def raw(self) -> OpenAI:
-        return self._client

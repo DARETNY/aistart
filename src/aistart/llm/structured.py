@@ -31,6 +31,7 @@ def complete_structured(
             model=settings.model,
             messages=messages,
             response_format={"type": "json_object"},
+            temperature=0,
         )
         raw = r.choices[0].message.content
         try:
